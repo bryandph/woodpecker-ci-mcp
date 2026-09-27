@@ -18,6 +18,12 @@ A Model Context Protocol (MCP) server that provides AI agents with access to Woo
 - `get_pipeline_status` - Get the status of a specific pipeline
 - `start_pipeline` - Start (restart) a specific pipeline
 - `stop_pipeline` - Stop a running pipeline
+- `wait_for_pipeline` - Block until a pipeline finishes (default timeout 2h), then return one
+  compact summary: outcome, duration, and, on failure, the log tail of each failed step.
+  Select the pipeline by `pipeline_number`, `latest`, or `commit` (waits for the pipeline to
+  appear, useful right after a push). Returns early on `blocked` unless `wait_on_blocked` is set.
+  Sends MCP progress notifications when the client supplies a progress token. At most 3 waits
+  run concurrently so the stdio worker pool stays available for other tools.
 - `approve_pipeline` - Approve a pending pipeline
 
 ### Repository Management

@@ -85,6 +85,11 @@ func (s *MCPServer) GetToolsInfo() []ToolInfo {
 			Category:    "Pipeline Management",
 		},
 		{
+			Name:        "wait_for_pipeline",
+			Description: "Wait for a pipeline to finish and summarize the result",
+			Category:    "Pipeline Management",
+		},
+		{
 			Name:        "list_repositories",
 			Description: "List all repositories accessible to the authenticated user",
 			Category:    "Repository Management",

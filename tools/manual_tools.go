@@ -239,6 +239,55 @@ func (tm *ToolManager) initializeTools() {
 			},
 		},
 		{
+			Name: "wait_for_pipeline",
+			Description: "Block until a pipeline finishes, then return one compact summary. " +
+				"Use this instead of repeatedly polling get_pipeline_status. " +
+				"On failure, includes the tail of each failed step's logs; on success, no logs. " +
+				"Returns early with outcome 'blocked' when the pipeline awaits approval, and " +
+				"returns outcome 'timeout' (not an error) if the timeout elapses first.",
+			InputSchema: mcp.ToolInputSchema{
+				Type: "object",
+				Properties: map[string]interface{}{
+					"repo_id": map[string]interface{}{
+						"type":        "number",
+						"description": "Repository ID (optional, can use repo_name or infer from git remote)",
+					},
+					"repo_name": map[string]interface{}{
+						"type":        "string",
+						"description": "Repository full name (optional, owner/repo, can use repo_id or infer from git remote)",
+					},
+					"pipeline_number": map[string]interface{}{
+						"type":        "number",
+						"description": "Pipeline number to wait for (exactly one of pipeline_number, latest, or commit)",
+					},
+					"latest": map[string]interface{}{
+						"type":        "boolean",
+						"description": "Wait for the repository's latest pipeline at call time",
+					},
+					"commit": map[string]interface{}{
+						"type":        "string",
+						"description": "Commit SHA or prefix; waits for its pipeline to appear, then for it to finish (useful right after a push)",
+					},
+					"timeout_seconds": map[string]interface{}{
+						"type":        "number",
+						"description": "Maximum time to wait (default: 7200, max: 21600)",
+					},
+					"poll_interval_seconds": map[string]interface{}{
+						"type":        "number",
+						"description": "Initial server-side poll interval; backs off to 60 (default: 15, min: 5)",
+					},
+					"log_lines": map[string]interface{}{
+						"type":        "number",
+						"description": "Log lines to return from the end of each failed step, 0 for none (default: 100, max: 1000)",
+					},
+					"wait_on_blocked": map[string]interface{}{
+						"type":        "boolean",
+						"description": "Keep waiting while the pipeline awaits approval instead of returning (default: false)",
+					},
+				},
+			},
+		},
+		{
 			Name:        "lint_config",
 			Description: "Lint a Woodpecker CI pipeline configuration file (local YAML file)",
 			InputSchema: mcp.ToolInputSchema{
@@ -310,6 +359,8 @@ func (tm *ToolManager) getToolHandler(name string) server.ToolHandlerFunc {
 			return tm.handleTriggerPipeline(ctx, arguments)
 		case "get_logs":
 			return tm.handleGetLogs(ctx, arguments)
+		case "wait_for_pipeline":
+			return tm.handleWaitForPipeline(ctx, request, arguments)
 		case "lint_config":
 			return tm.handleLintConfig(ctx, arguments)
 		default:
