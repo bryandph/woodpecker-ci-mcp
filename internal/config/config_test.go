@@ -68,6 +68,23 @@ func TestLoad_MissingConfig(t *testing.T) {
 	require.Equal(t, "text", cfg.Logging.Format)
 }
 
+func TestLoad_EnvironmentCredentials(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	originalDir, err := os.Getwd()
+	require.NoError(t, err)
+	defer func() { _ = os.Chdir(originalDir) }()
+	_ = os.Chdir(tmpDir)
+
+	t.Setenv("WOODPECKER_MCP_WOODPECKER_URL", "https://woodpecker.example.com")
+	t.Setenv("WOODPECKER_MCP_WOODPECKER_TOKEN", "env-token")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, "https://woodpecker.example.com", cfg.Woodpecker.URL)
+	require.Equal(t, "env-token", cfg.Woodpecker.Token)
+}
+
 func TestValidate_ValidConfig(t *testing.T) {
 	cfg := &Config{
 		Woodpecker: WoodpeckerConfig{

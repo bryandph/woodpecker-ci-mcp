@@ -47,6 +47,15 @@ func Load() (*Config, error) {
 
 	// Environment variables
 	v.SetEnvPrefix("WOODPECKER_MCP")
+	// Nested keys are not visible to Unmarshal through AutomaticEnv alone.
+	for key, env := range map[string]string{
+		"woodpecker.url":   "WOODPECKER_MCP_WOODPECKER_URL",
+		"woodpecker.token": "WOODPECKER_MCP_WOODPECKER_TOKEN",
+	} {
+		if err := v.BindEnv(key, env); err != nil {
+			return nil, fmt.Errorf("failed to bind %s: %w", env, err)
+		}
+	}
 	v.AutomaticEnv()
 
 	// Try to read config file
