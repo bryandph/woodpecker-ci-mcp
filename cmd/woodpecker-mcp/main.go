@@ -209,7 +209,7 @@ func configureLogger() {
 }
 
 func runServer() error {
-	fmt.Println(titleStyle.Render("Starting Woodpecker MCP Server"))
+	fmt.Fprintln(os.Stderr, titleStyle.Render("Starting Woodpecker MCP Server"))
 
 	// Load configuration
 	cfg, err := config.Load()
@@ -219,8 +219,8 @@ func runServer() error {
 
 	// Validate configuration
 	if err := cfg.Validate(); err != nil {
-		fmt.Println(errorStyle.Render(fmt.Sprintf("Configuration error: %v", err)))
-		fmt.Println(infoStyle.Render("Run 'woodpecker-mcp config init' to set up configuration"))
+		fmt.Fprintln(os.Stderr, errorStyle.Render(fmt.Sprintf("Configuration error: %v", err)))
+		fmt.Fprintln(os.Stderr, infoStyle.Render("Run 'woodpecker-mcp config init' to set up configuration"))
 		return err
 	}
 
@@ -230,7 +230,7 @@ func runServer() error {
 		Token: cfg.Woodpecker.Token,
 	}, logger)
 	if err != nil {
-		fmt.Println(errorStyle.Render(fmt.Sprintf("Failed to connect to Woodpecker: %v", err)))
+		fmt.Fprintln(os.Stderr, errorStyle.Render(fmt.Sprintf("Failed to connect to Woodpecker: %v", err)))
 		return err
 	}
 
@@ -240,8 +240,8 @@ func runServer() error {
 		return fmt.Errorf("failed to create MCP server: %w", err)
 	}
 
-	fmt.Println(successStyle.Render("MCP server started successfully"))
-	fmt.Println(infoStyle.Render(fmt.Sprintf("Connected to Woodpecker server: %s", cfg.Woodpecker.URL)))
+	fmt.Fprintln(os.Stderr, successStyle.Render("MCP server started successfully"))
+	fmt.Fprintln(os.Stderr, infoStyle.Render(fmt.Sprintf("Connected to Woodpecker server: %s", cfg.Woodpecker.URL)))
 
 	// Start serving
 	return mcpServer.Serve()
